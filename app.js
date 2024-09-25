@@ -12,7 +12,7 @@ const connect = async () => {
 }
 };
 
-// Function to create a new customer
+// function to create a new customer
 const createStudent = async () => {
     const name = prompt('Enter the student\'s name: ');
     const age = parseInt(prompt('Enter the student\'s age: '));
@@ -30,7 +30,7 @@ const viewStudents = async () => {
     });
 };
 
-// Function to update a customer
+// function to update a customer
 const updateStudent = async () => {
     const id = prompt('Enter the student ID to update: ');
     const name = prompt('What is the student\'s new name? ');
@@ -40,44 +40,44 @@ const updateStudent = async () => {
     console.log('Student updated successfully');
 };
 
-// Function to delete a customer
+// function to delete a customer
 const deleteStudent = async () => {
     const id = prompt('Enter the student ID to remove: ');
     await Student.findByIdAndDelete(id);
     console.log('Student removed successfully');
 };
 
-const main = async () => {
-    await connect();
-    while (true) {
-        //Display Menu Options
-        console.log('What would you like to do?');
-        console.log('1. Add a new student');
-        console.log('2. List all students');
-        console.log('3. Update a student');
-        console.log('4. Delete a student');
-        console.log('5. Quit');
+const actions = { // object to map user choices to actions
+  '1': { name: 'Add a new student', action: createStudent }, // description of action and function executed
+  '2': { name: 'List all students', action: viewStudents },
+  '3': { name: 'Update a student', action: updateStudent },
+  '4': { name: 'Delete a student', action: deleteStudent },
+  '5': { 
+      name: 'Quit', // description of action
+      action: async () => { // function to execute
+          console.log('Exiting...'); // message to console 
+          await mongoose.connection.close(); // close mongodb connection
+          return true; // return true to break out of main loop
+      }}};
 
-        // Get user's choice
-        const choice = prompt('Number of action to run: ');
+const main = async () => { // main function
+  await connect(); // database connection
+  while (true) { // start infinite loop
+      console.log('What would you like to do?'); // user prompt 
+      for (const [key, { name }] of Object.entries(actions)) { // iterate using object.entries(); method over the actions object and log each available action
+          console.log(`${key}. ${name}`); //display thru syntax action number and name
+      }
 
-        // Handle user's choice
-        if (choice === '1') {
-            await createStudent();
-          } else if (choice === '2') {
-            await viewStudents();
-          } else if (choice === '3') {
-            await updateStudent();
-          } else if (choice === '4') {
-            await deleteStudent();
-          } else if (choice === '5') {
-            console.log('Exiting...');
-            mongoose.connection.close();
-            break;
-          } else {
-            console.log('Invalid choice, please try again.');
+      const choice = prompt('Number of action to run: '); // prompt user to enter choice
+      
+      if (choice in actions) { // check if entered choice is valid
+          try {
+              if (await actions[choice].action()) break; // execute selected action and break loop if action returns true
+          } catch (error) { // logs errors
+              console.error('An error occurred:', error.message);
           }
-    }
-}
+      } else {
+          console.log('Invalid choice, please try again.'); // invalid choice
+      }}}
 
 main();
