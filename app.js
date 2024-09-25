@@ -56,7 +56,7 @@ const actions = { // object to map user choices to actions
       name: 'Quit', // description of action
       action: async () => { // function to execute
           console.log('Exiting...'); // message to console 
-          await mongoose.connection.close(); // close mongodb connection
+          await mongoose.disconnect(); // close mongodb connection
           return true; // return true to break out of main loop
       }}};
 
